@@ -1,6 +1,8 @@
 const schemaService = require("../services/schema.service");
 const fakerService = require("../services/faker.service");
 const insertService = require("../services/insert.service");
+const generatorService = require("../services/generator.service");
+
 
 
 async function obtenerTablas(req, res) {
@@ -92,34 +94,10 @@ async function generarEInsertar(req,res){
         }
 
 
-        const columnas = await schemaService.getTableStructure(tabla);
-
-
-        const registros = [];
-
-
-        for(let i = 0; i < cantidad; i++){
-
-            const registro = {};
-
-
-            for(const columna of columnas){
-
-                const valor = fakerService.generarValor(columna);
-
-
-                if(valor !== null){
-
-                    registro[columna.Field] = valor;
-
-                }
-
-            }
-
-
-            registros.push(registro);
-
-        }
+const registros = await generatorService.generarRegistros(
+    tabla,
+    cantidad
+);
 
 
         const resultado = await insertService.insertarMuchos(
@@ -151,9 +129,57 @@ async function generarEInsertar(req,res){
     }
 
 }
+async function vistaPrevia(req, res){
+
+    try{
+
+        const { tabla } = req.params;
+
+        const { cantidad } = req.body;
+
+
+        if(!cantidad){
+
+            return res.status(400).json({
+                mensaje:"Debe indicar la cantidad de registros"
+            });
+
+        }
+
+
+        const registros = await generatorService.generarRegistros(
+            tabla,
+            cantidad
+        );
+
+
+        res.json({
+
+            total: registros.length,
+
+            registros
+
+        });
+
+
+    }catch(error){
+
+        res.status(500).json({
+
+            mensaje:"Error generando vista previa",
+
+            error:error.message
+
+        });
+
+    }
+
+}
+
 module.exports = {
     obtenerTablas,
     obtenerEstructura,
     generarRegistro,
-    generarEInsertar
+    generarEInsertar,
+    vistaPrevia
 };
