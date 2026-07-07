@@ -23,6 +23,9 @@ async function obtenerTablas(req, res) {
     }
 
 }
+
+
+
 async function obtenerEstructura(req, res) {
 
     try {
@@ -42,29 +45,37 @@ async function obtenerEstructura(req, res) {
     }
 
 }
+
+
+
 async function generarRegistro(req, res) {
 
     try {
 
         const { tabla } = req.params;
 
-        // Obtener la estructura de la tabla
+
         const columnas = await schemaService.getTableStructure(tabla);
 
         const registro = {};
+
 
         for (const columna of columnas) {
 
             const valor = fakerService.generarValor(columna);
 
-            // No agregar columnas AUTO_INCREMENT
+
             if (valor !== null) {
+
                 registro[columna.Field] = valor;
+
             }
 
         }
 
+
         res.json(registro);
+
 
     } catch (error) {
 
@@ -76,28 +87,39 @@ async function generarRegistro(req, res) {
 
 }
 
-async function generarEInsertar(req,res){
 
-    try{
+
+
+async function generarEInsertar(req, res) {
+
+    try {
+
+        const inicio = Date.now();
+
 
         const { tabla } = req.params;
 
         const { cantidad } = req.body;
 
 
-        if(!cantidad){
+
+        if (!cantidad) {
 
             return res.status(400).json({
-                mensaje:"Debe indicar la cantidad de registros"
+
+                mensaje: "Debe indicar la cantidad de registros"
+
             });
 
         }
 
 
-const registros = await generatorService.generarRegistros(
-    tabla,
-    cantidad
-);
+
+        const registros = await generatorService.generarRegistros(
+            tabla,
+            cantidad
+        );
+
 
 
         const resultado = await insertService.insertarMuchos(
@@ -106,51 +128,77 @@ const registros = await generatorService.generarRegistros(
         );
 
 
+
+        const tiempo = Date.now() - inicio;
+
+
+
         res.json({
 
-            mensaje:"Registros insertados correctamente",
+            mensaje: "Proceso completado correctamente",
 
-            insertados: resultado.affectedRows
+            tabla,
+
+            solicitados: cantidad,
+
+            insertados: resultado,
+
+            errores: 0,
+
+            tiempo: `${tiempo} ms`
 
         });
 
 
 
-    }catch(error){
+    } catch (error) {
+
 
         res.status(500).json({
 
-            mensaje:"Error generando registros",
+            mensaje: "Error generando registros",
 
-            error:error.message
+            error: error.message
 
         });
+
 
     }
 
 }
-async function vistaPrevia(req, res){
 
-    try{
+
+
+
+async function vistaPrevia(req, res) {
+
+
+    try {
+
 
         const { tabla } = req.params;
 
         const { cantidad } = req.body;
 
 
-        if(!cantidad){
+
+        if (!cantidad) {
 
             return res.status(400).json({
-                mensaje:"Debe indicar la cantidad de registros"
+
+                mensaje: "Debe indicar la cantidad de registros"
+
             });
 
         }
+
 
 
         const registros = await generatorService.generarRegistros(
             tabla,
             cantidad
         );
+
 
 
         res.json({
@@ -162,24 +210,36 @@ async function vistaPrevia(req, res){
         });
 
 
-    }catch(error){
+
+    } catch (error) {
+
 
         res.status(500).json({
 
-            mensaje:"Error generando vista previa",
+            mensaje: "Error generando vista previa",
 
-            error:error.message
+            error: error.message
 
         });
+
 
     }
 
 }
 
+
+
+
 module.exports = {
+
     obtenerTablas,
+
     obtenerEstructura,
+
     generarRegistro,
+
     generarEInsertar,
+
     vistaPrevia
+
 };
