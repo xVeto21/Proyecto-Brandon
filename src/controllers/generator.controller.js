@@ -2,6 +2,7 @@ const schemaService = require("../services/schema.service");
 const fakerService = require("../services/faker.service");
 const insertService = require("../services/insert.service");
 const generatorService = require("../services/generator.service");
+const relationsService = require("../services/relations.service");
 
 
 
@@ -103,15 +104,19 @@ async function generarEInsertar(req, res) {
 
 
 
-        if (!cantidad) {
+        if(
+    !cantidad ||
+    typeof cantidad !== "number" ||
+    cantidad <= 0
+){
 
-            return res.status(400).json({
+    return res.status(400).json({
 
-                mensaje: "Debe indicar la cantidad de registros"
+        mensaje:"La cantidad debe ser un número mayor que 0"
 
-            });
+    });
 
-        }
+}
 
 
 
@@ -141,7 +146,7 @@ async function generarEInsertar(req, res) {
 
             solicitados: cantidad,
 
-            insertados: resultado,
+            insertados: resultado.affectedRows,
 
             errores: 0,
 
@@ -182,15 +187,19 @@ async function vistaPrevia(req, res) {
 
 
 
-        if (!cantidad) {
+        if(
+    !cantidad ||
+    typeof cantidad !== "number" ||
+    cantidad <= 0
+){
 
-            return res.status(400).json({
+    return res.status(400).json({
 
-                mensaje: "Debe indicar la cantidad de registros"
+        mensaje:"La cantidad debe ser un número mayor que 0"
 
-            });
+    });
 
-        }
+}
 
 
 
@@ -226,6 +235,31 @@ async function vistaPrevia(req, res) {
     }
 
 }
+async function obtenerRelaciones(req,res){
+
+    try{
+
+        const { tabla } = req.params;
+
+
+        const relaciones =
+            await relationsService.getForeignKeys(tabla);
+
+
+        res.json(relaciones);
+
+
+    }catch(error){
+
+        res.status(500).json({
+
+            mensaje:error.message
+
+        });
+
+    }
+
+}
 
 
 
@@ -240,6 +274,8 @@ module.exports = {
 
     generarEInsertar,
 
-    vistaPrevia
+    vistaPrevia,
+    
+    obtenerRelaciones
 
 };

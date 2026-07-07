@@ -9,5 +9,6 @@ router.get("/tables", generatorController.obtenerTablas);
 router.get("/tables/:tabla", generatorController.obtenerEstructura);
 router.post("/generate/:tabla", generatorController.generarEInsertar);
 router.post("/preview/:tabla", generatorController.vistaPrevia);
+router.get("/relations/:tabla",generatorController.obtenerRelaciones);
 
 module.exports = router;
