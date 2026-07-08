@@ -6,6 +6,7 @@ const relationsService = require("../services/relations.service");
 
 
 
+
 async function obtenerTablas(req, res) {
 
     try {
@@ -261,7 +262,37 @@ async function obtenerRelaciones(req,res){
 
 }
 
+async function obtenerInformacionTabla(req,res){
 
+    try{
+
+        const { tabla } = req.params;
+
+        const columnas = await schemaService.getTableStructure(tabla);
+
+        const relaciones = await relationsService.getForeignKeys(tabla);
+
+        res.json({
+
+            tabla,
+
+            columnas,
+
+            relaciones
+
+        });
+
+    }catch(error){
+
+        res.status(500).json({
+
+            mensaje:error.message
+
+        });
+
+    }
+
+}
 
 
 module.exports = {
@@ -275,7 +306,9 @@ module.exports = {
     generarEInsertar,
 
     vistaPrevia,
-    
-    obtenerRelaciones
+
+    obtenerRelaciones,
+
+    obtenerInformacionTabla
 
 };
